@@ -79,7 +79,7 @@ def ControlSettings(objAnalazyer):
 # global variables and initialization
 #---------------------------------------------------------
 
-ARRC_mav_connection = mavutil.mavlink_connection('udpin:localhost:14551')
+ARRC_mav_connection = mavutil.mavlink_connection('udpin:127.0.0.1:14551')
 
 SERIALPORT = None    #serial port identifier, use None to autodetect  
 BAUDRATE = 500000
