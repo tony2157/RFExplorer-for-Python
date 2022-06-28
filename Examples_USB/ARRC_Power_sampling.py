@@ -82,7 +82,7 @@ def ControlSettings(objAnalazyer):
 # global variables and initialization
 #---------------------------------------------------------
 
-ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=115200) #'udpin:127.0.0.1:14551'
+ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
 yay = ARRC_mav_connection.wait_heartbeat()
 ARRC_mav_connection.mav.request_data_stream_send(ARRC_mav_connection.target_system, ARRC_mav_connection.target_component,mavutil.mavlink.MAV_DATA_STREAM_ALL,1,1)
 print("Mavlink connection: "+ str(yay))
