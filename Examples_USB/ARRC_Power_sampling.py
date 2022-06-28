@@ -79,7 +79,7 @@ def ControlSettings(objAnalazyer):
 # global variables and initialization
 #---------------------------------------------------------
 
-ARRC_mav_connection = mavutil.mavlink_connection('udpin:127.0.0.1:14551')
+ARRC_mav_connection = mavutil.mavlink_connection('dev/ttyAMA0', baud=115200) #'udpin:127.0.0.1:14551'
 
 SERIALPORT = None    #serial port identifier, use None to autodetect  
 BAUDRATE = 500000
@@ -92,8 +92,8 @@ objRFE.AutoConfigure = False
 #frequency setting are available for your model
 #These freq settings will be updated later in SA condition.
 SPAN_SIZE_MHZ = 50           #Initialize settings
-START_SCAN_MHZ = 2475
-STOP_SCAN_MHZ = 2525
+START_SCAN_MHZ = 5800
+STOP_SCAN_MHZ = 5850
 
 #---------------------------------------------------------
 # Main processing loop
