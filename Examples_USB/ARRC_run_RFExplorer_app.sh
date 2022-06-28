@@ -1,6 +1,6 @@
 #! /bin/sh
 
-python3 mavproxy.py --master=/dev/serial0 --out=udpin:127.0.0.1:14551 --baudrate 921600
+mavproxy.py --master=/dev/ttyAMA0 --out=udpin:127.0.0.1:14551 --baudrate 115200
 
 sleep 10
 
