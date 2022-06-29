@@ -14,23 +14,12 @@ import time
 import RFExplorer
 from RFExplorer import RFE_Common 
 import math
-import time
 from pymavlink import mavutil
 #from pymavlink.dialects.v20 import ARRCdialect as ARRCmavlink
 
 #---------------------------------------------------------
 # Helper functions
 #---------------------------------------------------------
-
-def send_heartbeats(self):
-        now = time.time()
-        if now - self.last_heartbeat_sent > 0.5:
-            self.last_heartbeat_sent = now
-            ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_GENERIC,
-                                        mavutil.mavlink.MAV_AUTOPILOT_INVALID,
-                                        0,
-                                        0,
-                                        0)
 
 def PrintPeak(objAnalazyer):
     """This function prints the amplitude and frequency peak of the latest received sweep
@@ -95,9 +84,7 @@ def ControlSettings(objAnalazyer):
 #---------------------------------------------------------
 # global variables and initialization
 #---------------------------------------------------------
-last_heartbeat_sent = 0
-
-ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
+ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=57600, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
 
 yay = ARRC_mav_connection.wait_heartbeat()
 print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
@@ -166,7 +153,6 @@ try:
                     objSweep=None
                     #Wait for new configuration to arrive (as it will clean up old sweep data)
                     while(True):
-                        send_heartbeats()
                         objRFE.ProcessReceivedString(True);
                         if (objRFE.SweepData.Count>0):
                             objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
