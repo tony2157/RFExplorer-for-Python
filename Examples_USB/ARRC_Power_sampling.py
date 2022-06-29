@@ -22,10 +22,10 @@ from pymavlink import mavutil
 # Helper functions
 #---------------------------------------------------------
 
-def send_heartbeats():
+def send_heartbeats(self):
         now = time.time()
-        if now - last_heartbeat_sent > 0.5:
-            last_heartbeat_sent = now
+        if now - self.last_heartbeat_sent > 0.5:
+            self.last_heartbeat_sent = now
             ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_GENERIC,
                                         mavutil.mavlink.MAV_AUTOPILOT_INVALID,
                                         0,
