@@ -87,7 +87,7 @@ def ControlSettings(objAnalazyer):
 #---------------------------------------------------------
 # global variables and initialization
 #---------------------------------------------------------
-ARRC_mav_connection = mavutil.mavlink_connection('/dev/serial0', baud=19200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
+ARRC_mav_connection = mavutil.mavlink_connection('/dev/serial0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
 
 yay = ARRC_mav_connection.wait_heartbeat()
 print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
