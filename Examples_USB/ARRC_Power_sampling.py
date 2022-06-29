@@ -31,7 +31,7 @@ def PrintPeak(objAnalazyer):
     fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
     fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
 
-    print("     Peak: " + "{0:.3f}".format(fCenterFreq) + "MHz  " + str(fAmplitudeDBM) + "dBm")
+    #print("     Peak: " + "{0:.3f}".format(fCenterFreq) + "MHz  " + str(fAmplitudeDBM) + "dBm")
 
     # Create array with values to send over mavlink
     values = [fCenterFreq, fAmplitudeDBM, 0, 0, 0]
@@ -151,7 +151,7 @@ try:
                             objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
 
                             nInd += 1
-                            print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
+                            #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
                             PrintPeak(objRFE)
                     #     if(math.fabs(objRFE.StartFrequencyMHZ - StartFreq) <= 0.001):
                     #             break
