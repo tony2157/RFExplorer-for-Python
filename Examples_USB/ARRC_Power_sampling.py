@@ -31,13 +31,16 @@ def PrintPeak(objAnalazyer):
     fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
     fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
 
-    print("     Peak: " + "{0:.3f}".format(fCenterFreq) + "MHz  " + str(fAmplitudeDBM) + "dBm")
+    #print("     Peak: " + "{0:.3f}".format(fCenterFreq) + "MHz  " + str(fAmplitudeDBM) + "dBm")
 
     # Create array with values to send over mavlink
     values = [fCenterFreq, fAmplitudeDBM, 0, 0, 0]
 
     # MAVLink_arrc_sensor_raw_message(time_boot_ms, app_datatype, app_datalength, values)
     ARRC_mav_connection.mav.send(ARRCmavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
+    
+    #msg = ARRC_mav_connection.recv_match(blocking=True)
+    #print(str(msg))
 
 
 def ControlSettings(objAnalazyer):
@@ -79,7 +82,10 @@ def ControlSettings(objAnalazyer):
 # global variables and initialization
 #---------------------------------------------------------
 
-ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=115200) #'udpin:127.0.0.1:14551'
+ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
+yay = ARRC_mav_connection.wait_heartbeat()
+ARRC_mav_connection.mav.request_data_stream_send(ARRC_mav_connection.target_system, ARRC_mav_connection.target_component,mavutil.mavlink.MAV_DATA_STREAM_ALL,1,1)
+print("Mavlink connection: "+ str(yay))
 
 SERIALPORT = None    #serial port identifier, use None to autodetect  
 BAUDRATE = 500000
@@ -145,7 +151,7 @@ try:
                             objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
 
                             nInd += 1
-                            print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
+                            #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
                             PrintPeak(objRFE)
                     #     if(math.fabs(objRFE.StartFrequencyMHZ - StartFreq) <= 0.001):
                     #             break
