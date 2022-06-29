@@ -49,8 +49,10 @@ def PrintPeak(objAnalazyer):
 
     # MAVLink_arrc_sensor_raw_message(time_boot_ms, app_datatype, app_datalength, values)
     #ARRC_mav_connection.mav.send(ARRCmavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
-    ARRC_mav_connection.mav.send(mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,ARRC_mav_connection.target_system,ARRC_mav_connection.target_component,0,2,values))
-    
+    #ARRC_mav_connection.mav.send(mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
+    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,2,values)    
+    #print(str(values))
+
     #msg = ARRC_mav_connection.recv_match(blocking=True)
     #print(str(msg))
 
@@ -95,11 +97,18 @@ def ControlSettings(objAnalazyer):
 #---------------------------------------------------------
 last_heartbeat_sent = 0
 
+<<<<<<< HEAD
 ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
 
 yay = ARRC_mav_connection.wait_heartbeat()
 ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_GCS, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
 
+=======
+ARRC_mav_connection = mavutil.mavlink_connection('/dev/ttyAMA0', baud=115200) #, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
+yay = ARRC_mav_connection.wait_heartbeat()
+print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
+ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_GENERIC, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
+>>>>>>> 04aaef86020dc3b440c9edbecfcf4c3ce2ba3fc3
 ARRC_mav_connection.mav.request_data_stream_send(ARRC_mav_connection.target_system, ARRC_mav_connection.target_component,mavutil.mavlink.MAV_DATA_STREAM_ALL,1,1)
 print("Mavlink connection: "+ str(yay))
 
