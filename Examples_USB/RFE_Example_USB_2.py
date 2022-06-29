@@ -15,7 +15,7 @@ import RFExplorer
 from RFExplorer import RFE_Common 
 import math
 from pymavlink import mavutil
-from pymavlink.dialects.v20 import ARRCdialect as ARRCmavlink
+#from pymavlink.dialects.v20 import ARRCdialect as ARRCmavlink
 
 #---------------------------------------------------------
 # Helper functions
@@ -37,7 +37,8 @@ def PrintPeak(objAnalazyer):
     values = [fCenterFreq, fAmplitudeDBM, 0, 0, 0]
 
     # MAVLink_arrc_sensor_raw_message(time_boot_ms, app_datatype, app_datalength, values)
-    ARRC_mav_connection.mav.send(ARRCmavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
+    #ARRC_mav_connection.mav.send(ARRCmavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
+    ARRC_mav_connection.mav.send(mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,ARRC_mav_connection.target_system,ARRC_mav_connection.target_component,0,2,values))
 
 
 def ControlSettings(objAnalazyer):
