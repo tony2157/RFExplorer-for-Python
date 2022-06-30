@@ -41,7 +41,7 @@ def PrintPeak(objAnalazyer):
     # MAVLink_arrc_sensor_raw_message(time_boot_ms, app_datatype, app_datalength, values)
     #ARRC_mav_connection.mav.send(ARRCmavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
     #ARRC_mav_connection.mav.send(mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
-    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,2,values,True)    
+    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,2,values)    
     ARRC_msg = mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values)
     print(str(ARRC_msg))
 
