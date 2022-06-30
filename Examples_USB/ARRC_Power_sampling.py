@@ -149,6 +149,7 @@ try:
             SpanSize, StartFreq, StopFreq = ControlSettings(objRFE)
             if(SpanSize and StartFreq and StopFreq):
                 nInd = 0
+                last_beat = time.time()
                 while (True): 
                     #Set new configuration into device
                     objRFE.UpdateDeviceConfig(StartFreq, StopFreq)
@@ -156,7 +157,11 @@ try:
                     objSweep=None
                     #Wait for new configuration to arrive (as it will clean up old sweep data)
                     while(True):
-                        objRFE.ProcessReceivedString(True);
+                        if(time.time() - last_beat > 0.95):
+                            ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
+                            last_beat = time.time()
+
+                        objRFE.ProcessReceivedString(True)
                         if (objRFE.SweepData.Count>0):
                             objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
 
