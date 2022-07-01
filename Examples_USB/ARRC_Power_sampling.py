@@ -118,6 +118,8 @@ try:
         #If object is an analyzer, we can scan for received sweeps
         if(objRFE.IsAnalyzer()):
             print("---- Spectrum Analyzer Example ----")
+            autoclean = objRFE.AutoCleanConfig()
+            print("Autoclean is " + str(autoclean))
             #update frequency setting. This was added to be compatible with all RFE SA models
             #START_SCAN_MHZ = objRFE.MinFreqMHZ
             #STOP_SCAN_MHZ = START_SCAN_MHZ + 200
@@ -140,6 +142,7 @@ try:
                 
                 #Set new configuration into device
                 objRFE.UpdateDeviceConfig(StartFreq, StopFreq)
+                objRFE.AutoCleanConfig(True)
                 objSweep=None
                 while (True): 
 
@@ -155,7 +158,7 @@ try:
                         nInd += 1
                         #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
                         PrintPeak(objRFE)
-                        objRFE.SweepData.CleanSweepData
+                        objRFE.CleanSweepData
             else:
                 print("Error: settings are wrong.\nPlease, change and try again")
     else:
