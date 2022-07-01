@@ -16,7 +16,6 @@ import RFExplorer
 from RFExplorer import RFE_Common 
 import math
 from pymavlink import mavutil
-#from pymavlink.dialects.v20 import ARRCdialect as ARRCmavlink
 
 #---------------------------------------------------------
 # Helper functions
@@ -32,8 +31,7 @@ def PrintPeak(objAnalazyer):
     fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
     fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
 
-    #print("     Peak: " + "{0:.3f}".format(fCenterFreq) + "MHz  " + str(fAmplitudeDBM) + "dBm")
-
+    # Pack ARRC's message and send it
     ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,fCenterFreq,fAmplitudeDBM)
 
 
@@ -124,17 +122,19 @@ try:
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
 
             # Start connection with Pixhawk through Mavlink
-            #ARRC_mav_connection = mavutil.mavlink_connection('/dev/serial0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
             ARRC_mav_connection = mavutil.mavserial('/dev/serial0', baud=115200, source_system=1, source_component=191)
-            yay = ARRC_mav_connection.wait_heartbeat()
-            print("Mavlink connection: "+ str(yay))
+            
+            # Wait for hearbeat from Pixhawk
+            PX4_beat = ARRC_mav_connection.wait_heartbeat()
+            print("Mavlink connection: "+ str(PX4_beat))
             print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
+            
+            # Send RPi heartbeat to confirm handshake
             ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
 
             #Control settings
             SpanSize, StartFreq, StopFreq = ControlSettings(objRFE)
             if(SpanSize and StartFreq and StopFreq):
-                nInd = 0
                 last_beat = time.time()
                 last_RAM_reset = time.time()
                 
@@ -143,21 +143,21 @@ try:
                 objSweep=None
                 while (True): 
 
+                    # Clear the RAM every once in a while
                     if(time.time() - last_RAM_reset > 10):
                         objRFE.CleanSweepData()
                         objRFE.ResetInternalBuffers()
                         last_RAM_reset = time.time()
 
+                    # Send Heartbeat to Pixhawk every second
                     if(time.time() - last_beat > 0.95):
                         ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
                         last_beat = time.time()
 
+                    # Read the RFExplorer and send data over Mavlink
                     objRFE.ProcessReceivedString(True)
                     if (objRFE.SweepData.Count>0):
                         objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
-
-                        nInd += 1
-                        #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
                         PrintPeak(objRFE)
             
             else:
