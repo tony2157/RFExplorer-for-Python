@@ -169,6 +169,7 @@ try:
                             nInd += 1
                             #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
                             PrintPeak(objRFE)
+                            objRFE.ResetInternalBuffers
                     #     if(math.fabs(objRFE.StartFrequencyMHZ - StartFreq) <= 0.001):
                     #             break
   
