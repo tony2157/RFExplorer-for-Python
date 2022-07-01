@@ -19,6 +19,6 @@ while(True):
         ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
         last_beat = time.time()
 
-    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,2,1,1)
+    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,2,1000,-25)
     #ARRC_mav_connection.mav.uavionix_adsb_transceiver_health_report_send(1)
     time.sleep(0.1)
