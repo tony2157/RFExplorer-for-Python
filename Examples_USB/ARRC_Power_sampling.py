@@ -132,6 +132,18 @@ try:
             # Send RPi heartbeat to confirm handshake
             ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
 
+            # Wait for config message 
+            msg = ARRC_mav_connection.recv_match(type='ARRC_SENSOR_RAW', blocking=True)
+            if not msg:
+                START_SCAN_MHZ = 5800
+                STOP_SCAN_MHZ = 5850
+            elif msg.get_type() == "BAD_DATA":
+                START_SCAN_MHZ = 5800
+                STOP_SCAN_MHZ = 5850
+            else:
+                START_SCAN_MHZ = msg.dfreq - 25
+                STOP_SCAN_MHZ = msg.dfreq + 25
+
             #Control settings
             SpanSize, StartFreq, StopFreq = ControlSettings(objRFE)
             if(SpanSize and StartFreq and StopFreq):
