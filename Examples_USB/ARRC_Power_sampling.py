@@ -149,11 +149,17 @@ try:
             if(SpanSize and StartFreq and StopFreq):
                 nInd = 0
                 last_beat = time.time()
+                last_RAM_reset = time.time()
+                
+                #Set new configuration into device
+                objRFE.UpdateDeviceConfig(StartFreq, StopFreq)
+                objSweep=None
                 while (True): 
-                    #Set new configuration into device
-                    objRFE.UpdateDeviceConfig(StartFreq, StopFreq)
 
-                    objSweep=None
+                    if(time.time() - last_RAM_reset > 5):
+                        objRFE.UpdateDeviceConfig(StartFreq, StopFreq)    
+                        last_RAM_reset = time.time()
+
                     #Wait for new configuration to arrive (as it will clean up old sweep data)
                     if(time.time() - last_beat > 0.95):
                         ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
