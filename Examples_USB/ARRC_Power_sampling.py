@@ -1,3 +1,4 @@
+
 #pylint: disable=trailing-whitespace, line-too-long, bad-whitespace, invalid-name, R0204, C0200
 #pylint: disable=superfluous-parens, missing-docstring, broad-except, R0801
 #pylint: disable=too-many-lines, too-many-instance-attributes, too-many-statements, too-many-nested-blocks
@@ -34,15 +35,15 @@ def PrintPeak(objAnalazyer):
     #print("     Peak: " + "{0:.3f}".format(fCenterFreq) + "MHz  " + str(fAmplitudeDBM) + "dBm")
 
     # Create array with values to send over mavlink
-    values = [fCenterFreq, fAmplitudeDBM, 0, 0, 0]
+    #values = [fCenterFreq, fAmplitudeDBM, 0, 0, 0]
 
     time.sleep(1)
 
     # MAVLink_arrc_sensor_raw_message(time_boot_ms, app_datatype, app_datalength, values)
     #ARRC_mav_connection.mav.send(ARRCmavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
     #ARRC_mav_connection.mav.send(mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
-    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,2,values)    
-    ARRC_msg = mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values)
+    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,fCenterFreq,fAmplitudeDBM)    
+    ARRC_msg = mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,fCenterFreq,fAmplitudeDBM)
     print(str(ARRC_msg))
 
     #msg = ARRC_mav_connection.recv_match(blocking=True)
