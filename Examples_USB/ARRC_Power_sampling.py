@@ -155,30 +155,18 @@ try:
 
                     objSweep=None
                     #Wait for new configuration to arrive (as it will clean up old sweep data)
-                    while(True):
-                        if(time.time() - last_beat > 0.95):
-                            ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
-                            last_beat = time.time()
+                    if(time.time() - last_beat > 0.95):
+                        ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
+                        last_beat = time.time()
 
-                        objRFE.ProcessReceivedString(True)
-                        if (objRFE.SweepData.Count>0):
-                            objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
+                    objRFE.ProcessReceivedString(True)
+                    if (objRFE.SweepData.Count>0):
+                        objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
 
-                            nInd += 1
-                            #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
-                            PrintPeak(objRFE)
-                            objRFE.ResetInternalBuffers
-                    #     if(math.fabs(objRFE.StartFrequencyMHZ - StartFreq) <= 0.001):
-                    #             break
-  
-                    # #set new frequency range
-                    # StartFreq = StopFreq
-                    # StopFreq = StartFreq + SpanSize
-                    # if (StopFreq > STOP_SCAN_MHZ):
-                    #     StopFreq = STOP_SCAN_MHZ
-
-                    # if (StartFreq >= StopFreq):
-                    #     break
+                        nInd += 1
+                        #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
+                        PrintPeak(objRFE)
+                        objRFE.ResetInternalBuffers
             else:
                 print("Error: settings are wrong.\nPlease, change and try again")
     else:
