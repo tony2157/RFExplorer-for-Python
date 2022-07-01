@@ -88,17 +88,6 @@ def ControlSettings(objAnalazyer):
 #---------------------------------------------------------
 # global variables and initialization
 #---------------------------------------------------------
-#ARRC_mav_connection = mavutil.mavlink_connection('/dev/serial0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
-ARRC_mav_connection = mavutil.mavserial('/dev/serial0', baud=115200, source_system=1, source_component=191)
-
-yay = ARRC_mav_connection.wait_heartbeat()
-print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
-
-ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
-
-#ARRC_mav_connection.mav.request_data_stream_send(ARRC_mav_connection.target_system, ARRC_mav_connection.target_component,mavutil.mavlink.MAV_DATA_STREAM_ALL,1,1)
-print("Mavlink connection: "+ str(yay))
-
 SERIALPORT = None    #serial port identifier, use None to autodetect  
 BAUDRATE = 500000
 
@@ -146,6 +135,14 @@ try:
             #START_SCAN_MHZ = objRFE.MinFreqMHZ
             #STOP_SCAN_MHZ = START_SCAN_MHZ + 200
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
+
+            # Start connection with Pixhawk through Mavlink
+            #ARRC_mav_connection = mavutil.mavlink_connection('/dev/serial0', baud=115200, source_system=1, source_component=191) #'udpin:127.0.0.1:14551'
+            ARRC_mav_connection = mavutil.mavserial('/dev/serial0', baud=115200, source_system=1, source_component=191)
+            yay = ARRC_mav_connection.wait_heartbeat()
+            print("Mavlink connection: "+ str(yay))
+            print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
+            ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
 
             #Control settings
             SpanSize, StartFreq, StopFreq = ControlSettings(objRFE)
