@@ -168,7 +168,7 @@ try:
                         nInd += 1
                         #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
                         PrintPeak(objRFE)
-                        objRFE.CleanSweepData
+                        objRFE.SweepData.CleanSweepData
             else:
                 print("Error: settings are wrong.\nPlease, change and try again")
     else:
