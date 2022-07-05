@@ -83,9 +83,9 @@ objRFE.AutoConfigure = False
 #Check RFE SA Comparation chart from www.rf-explorer.com\models to know what
 #frequency setting are available for your model
 #These freq settings will be updated later in SA condition.
-SPAN_SIZE_MHZ = 50           #Initialize settings
-START_SCAN_MHZ = 5800
-STOP_SCAN_MHZ = 5850
+SPAN_SIZE_MHZ = 10           #Initialize settings
+START_SCAN_MHZ = 2945
+STOP_SCAN_MHZ = 2955
 
 #---------------------------------------------------------
 # Main processing loop
@@ -120,6 +120,8 @@ try:
             #START_SCAN_MHZ = objRFE.MinFreqMHZ
             #STOP_SCAN_MHZ = START_SCAN_MHZ + 200
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
+
+            objRFE.SendCommand_Realtime()
 
             # Start connection with Pixhawk through Mavlink
             ARRC_mav_connection = mavutil.mavserial('/dev/serial0', baud=115200, source_system=1, source_component=191)
