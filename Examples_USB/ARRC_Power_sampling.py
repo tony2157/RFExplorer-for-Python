@@ -83,9 +83,9 @@ objRFE.AutoConfigure = False
 #Check RFE SA Comparation chart from www.rf-explorer.com\models to know what
 #frequency setting are available for your model
 #These freq settings will be updated later in SA condition.
-SPAN_SIZE_MHZ = 50           #Initialize settings
-START_SCAN_MHZ = 2925
-STOP_SCAN_MHZ = 2975
+SPAN_SIZE_MHZ = 2           #Initialize settings
+START_SCAN_MHZ = 2999
+STOP_SCAN_MHZ = 3001
 
 #---------------------------------------------------------
 # Main processing loop
@@ -121,7 +121,10 @@ try:
             #STOP_SCAN_MHZ = START_SCAN_MHZ + 200
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
 
-            objRFE.SendCommand_Realtime()
+            #objRFE.SendCommand("C+\x03")    # Normal mode
+            objRFE.SendCommand("C+\x03")    # Average mode
+            objRFE.SendCommand("Cp2")       # DSP: fast
+
 
             # Start connection with Pixhawk through Mavlink
             ARRC_mav_connection = mavutil.mavserial('/dev/serial0', baud=115200, source_system=1, source_component=191)
@@ -137,14 +140,14 @@ try:
             # Wait for config message 
             msg = ARRC_mav_connection.recv_match(type='ARRC_SENSOR_RAW', blocking=True)
             if not msg:
-                START_SCAN_MHZ = 2975
-                STOP_SCAN_MHZ = 3025
+                START_SCAN_MHZ = 2999
+                STOP_SCAN_MHZ = 3001
             elif msg.get_type() == "BAD_DATA":
-                START_SCAN_MHZ = 2975
-                STOP_SCAN_MHZ = 3025
+                START_SCAN_MHZ = 2999
+                STOP_SCAN_MHZ = 3001
             else:
-                START_SCAN_MHZ = msg.dfreq - 25
-                STOP_SCAN_MHZ = msg.dfreq + 25
+                START_SCAN_MHZ = msg.dfreq - 1
+                STOP_SCAN_MHZ = msg.dfreq + 1
 
             #Control settings
             SpanSize, StartFreq, StopFreq = ControlSettings(objRFE)
