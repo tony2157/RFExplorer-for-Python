@@ -137,11 +137,11 @@ try:
             # Wait for config message 
             msg = ARRC_mav_connection.recv_match(type='ARRC_SENSOR_RAW', blocking=True)
             if not msg:
-                START_SCAN_MHZ = 2950
-                STOP_SCAN_MHZ = 3050
+                START_SCAN_MHZ = 2975
+                STOP_SCAN_MHZ = 3025
             elif msg.get_type() == "BAD_DATA":
-                START_SCAN_MHZ = 2950
-                STOP_SCAN_MHZ = 3050
+                START_SCAN_MHZ = 2975
+                STOP_SCAN_MHZ = 3025
             else:
                 START_SCAN_MHZ = msg.dfreq - 25
                 STOP_SCAN_MHZ = msg.dfreq + 25
