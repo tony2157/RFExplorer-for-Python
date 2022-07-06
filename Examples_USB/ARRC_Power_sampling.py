@@ -83,9 +83,9 @@ objRFE.AutoConfigure = False
 #Check RFE SA Comparation chart from www.rf-explorer.com\models to know what
 #frequency setting are available for your model
 #These freq settings will be updated later in SA condition.
-SPAN_SIZE_MHZ = 10           #Initialize settings
-START_SCAN_MHZ = 2945
-STOP_SCAN_MHZ = 2955
+SPAN_SIZE_MHZ = 50           #Initialize settings
+START_SCAN_MHZ = 2925
+STOP_SCAN_MHZ = 2975
 
 #---------------------------------------------------------
 # Main processing loop
@@ -137,14 +137,14 @@ try:
             # Wait for config message 
             msg = ARRC_mav_connection.recv_match(type='ARRC_SENSOR_RAW', blocking=True)
             if not msg:
-                START_SCAN_MHZ = 2995
-                STOP_SCAN_MHZ = 3005
+                START_SCAN_MHZ = 2950
+                STOP_SCAN_MHZ = 3050
             elif msg.get_type() == "BAD_DATA":
-                START_SCAN_MHZ = 2995
-                STOP_SCAN_MHZ = 3005
+                START_SCAN_MHZ = 2950
+                STOP_SCAN_MHZ = 3050
             else:
-                START_SCAN_MHZ = msg.dfreq - 10
-                STOP_SCAN_MHZ = msg.dfreq + 10
+                START_SCAN_MHZ = msg.dfreq - 25
+                STOP_SCAN_MHZ = msg.dfreq + 25
 
             #Control settings
             SpanSize, StartFreq, StopFreq = ControlSettings(objRFE)
