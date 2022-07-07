@@ -23,10 +23,6 @@ from pymavlink import mavutil
 # Helper functions
 #---------------------------------------------------------
 
-def func(x,a,b,c):
-    return a*x*x + b*x + c
-
-
 def PrintPeak(objAnalazyer):
     """This function prints the amplitude and frequency peak of the latest received sweep
     """
@@ -42,11 +38,11 @@ def PrintPeak(objAnalazyer):
         
         ydata = numpy.array([fAmplitudeDBM_bef, fAmplitudeDBM, fAmplitudeDBM_aft])
         xdata = numpy.array([-1, 0, 1])
-        popt = optimization.curve_fit(func, xdata, ydata)
+        fit = numpy.polyfit(xdata, ydata, 2)
 
-        if(popt[0] < 0):
-            k = -popt[1]/(2*popt[0])
-            fAmplitudeDBM = popt[0]*k*k + popt[1]*k + popt[2]
+        if(fit[0] < 0):
+            k = -fit[1]/(2*fit[0])
+            fAmplitudeDBM = fit[0]*k**2 + fit[1]*k + fit[2]
 
     fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
     fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
