@@ -15,11 +15,17 @@ import time
 import RFExplorer
 from RFExplorer import RFE_Common 
 import math
+import numpy
+import scipy.optimize as optimization
 from pymavlink import mavutil
 
 #---------------------------------------------------------
 # Helper functions
 #---------------------------------------------------------
+
+def func(x,a,b,c):
+    return a*x*x + b*x + c
+
 
 def PrintPeak(objAnalazyer):
     """This function prints the amplitude and frequency peak of the latest received sweep
@@ -28,6 +34,20 @@ def PrintPeak(objAnalazyer):
     objSweepTemp = objAnalazyer.SweepData.GetData(nIndex)
     nStep = objSweepTemp.GetPeakDataPoint()      #Get index of the peak
     fAmplitudeDBM = objSweepTemp.GetAmplitude_DBM(nStep)    #Get amplitude of the peak
+
+    # Interpolate bins adjacent to the peak
+    if(nStep != 0 & nStep != 111):
+        fAmplitudeDBM_bef = objSweepTemp.GetAmplitude_DBM(nStep-1)
+        fAmplitudeDBM_aft = objSweepTemp.GetAmplitude_DBM(nStep+1)
+        
+        ydata = numpy.array([fAmplitudeDBM_bef, fAmplitudeDBM, fAmplitudeDBM_aft])
+        xdata = numpy.array([-1, 0, 1])
+        popt = optimization.curve_fit(func, xdata, ydata)
+
+        if(popt[0] < 0):
+            k = -popt[1]/(2*popt[0])
+            fAmplitudeDBM = popt[0]*k*k + popt[1]*k + popt[2]
+
     fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
     fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
 
