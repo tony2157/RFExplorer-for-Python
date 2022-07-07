@@ -30,22 +30,25 @@ def PrintPeak(objAnalazyer):
     objSweepTemp = objAnalazyer.SweepData.GetData(nIndex)
     nStep = objSweepTemp.GetPeakDataPoint()      #Get index of the peak
     fAmplitudeDBM = objSweepTemp.GetAmplitude_DBM(nStep)    #Get amplitude of the peak
+    fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
+    fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
 
     # Interpolate bins adjacent to the peak
     if(nStep != 0 & nStep != 111):
         fAmplitudeDBM_bef = objSweepTemp.GetAmplitude_DBM(nStep-1)
         fAmplitudeDBM_aft = objSweepTemp.GetAmplitude_DBM(nStep+1)
+        fCenterFreq_bef = objSweepTemp.GetFrequencyMHZ(nStep-1)   #Get frequency of the peak
+        fCenterFreq_bef = math.floor(fCenterFreq_bef * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
+        fCenterFreq_aft = objSweepTemp.GetFrequencyMHZ(nStep+1)   #Get frequency of the peak
+        fCenterFreq_aft = math.floor(fCenterFreq_aft * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
         
         ydata = numpy.array([fAmplitudeDBM_bef, fAmplitudeDBM, fAmplitudeDBM_aft])
-        xdata = numpy.array([-1, 0, 1])
+        xdata = numpy.array([fCenterFreq_bef, fCenterFreq, fCenterFreq_aft])
         fit = numpy.polyfit(xdata, ydata, 2)
 
         if(fit[0] < 0):
             k = -fit[1]/(2*fit[0])
             fAmplitudeDBM = fit[0]*k**2 + fit[1]*k + fit[2]
-
-    fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
-    fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
 
     # Pack ARRC's message and send it
     ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,fCenterFreq,fAmplitudeDBM)
