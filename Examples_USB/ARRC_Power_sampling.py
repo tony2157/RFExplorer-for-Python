@@ -1,3 +1,4 @@
+
 #pylint: disable=trailing-whitespace, line-too-long, bad-whitespace, invalid-name, R0204, C0200
 #pylint: disable=superfluous-parens, missing-docstring, broad-except, R0801
 #pylint: disable=too-many-lines, too-many-instance-attributes, too-many-statements, too-many-nested-blocks
@@ -14,8 +15,9 @@ import time
 import RFExplorer
 from RFExplorer import RFE_Common 
 import math
+import numpy
+import scipy.optimize as optimization
 from pymavlink import mavutil
-#from pymavlink.dialects.v20 import ARRCdialect as ARRCmavlink
 
 #---------------------------------------------------------
 # Helper functions
@@ -31,22 +33,25 @@ def PrintPeak(objAnalazyer):
     fCenterFreq = objSweepTemp.GetFrequencyMHZ(nStep)   #Get frequency of the peak
     fCenterFreq = math.floor(fCenterFreq * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
 
-    #print("     Peak: " + "{0:.3f}".format(fCenterFreq) + "MHz  " + str(fAmplitudeDBM) + "dBm")
+    # Interpolate bins adjacent to the peak
+    if(nStep != 0 & nStep != 111):
+        fAmplitudeDBM_bef = objSweepTemp.GetAmplitude_DBM(nStep-1)
+        fAmplitudeDBM_aft = objSweepTemp.GetAmplitude_DBM(nStep+1)
+        fCenterFreq_bef = objSweepTemp.GetFrequencyMHZ(nStep-1)   #Get frequency of the peak
+        fCenterFreq_bef = math.floor(fCenterFreq_bef * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
+        fCenterFreq_aft = objSweepTemp.GetFrequencyMHZ(nStep+1)   #Get frequency of the peak
+        fCenterFreq_aft = math.floor(fCenterFreq_aft * 10 ** 3) / 10 ** 3   #truncate to 3 decimals
+        
+        ydata = numpy.array([fAmplitudeDBM_bef, fAmplitudeDBM, fAmplitudeDBM_aft])
+        xdata = numpy.array([fCenterFreq_bef, fCenterFreq, fCenterFreq_aft])
+        fit = numpy.polyfit(xdata, ydata, 2)
 
-    # Create array with values to send over mavlink
-    values = [fCenterFreq, fAmplitudeDBM, 0, 0, 0]
+        if(fit[0] < 0):
+            k = -fit[1]/(2*fit[0])
+            fAmplitudeDBM = fit[0]*k**2 + fit[1]*k + fit[2]
 
-    time.sleep(1)
-
-    # MAVLink_arrc_sensor_raw_message(time_boot_ms, app_datatype, app_datalength, values)
-    #ARRC_mav_connection.mav.send(ARRCmavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
-    #ARRC_mav_connection.mav.send(mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values))
-    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,2,values,True)    
-    ARRC_msg = mavutil.mavlink.MAVLink_arrc_sensor_raw_message(10,0,2,values)
-    print(str(ARRC_msg))
-
-    #msg = ARRC_mav_connection.recv_match(blocking=True)
-    #print(str(msg))
+    # Pack ARRC's message and send it
+    ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,fCenterFreq,fAmplitudeDBM)
 
 
 def ControlSettings(objAnalazyer):
@@ -87,16 +92,6 @@ def ControlSettings(objAnalazyer):
 #---------------------------------------------------------
 # global variables and initialization
 #---------------------------------------------------------
-ARRC_mav_connection = mavutil.mavlink_connection('tcp:127.0.0.1:14551')
-
-#yay = ARRC_mav_connection.wait_heartbeat()
-#print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
-
-#ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
-
-#ARRC_mav_connection.mav.request_data_stream_send(ARRC_mav_connection.target_system, ARRC_mav_connection.target_component,mavutil.mavlink.MAV_DATA_STREAM_ALL,1,1)
-#print("Mavlink connection: "+ str(yay))
-
 SERIALPORT = None    #serial port identifier, use None to autodetect  
 BAUDRATE = 500000
 
@@ -107,9 +102,11 @@ objRFE.AutoConfigure = False
 #Check RFE SA Comparation chart from www.rf-explorer.com\models to know what
 #frequency setting are available for your model
 #These freq settings will be updated later in SA condition.
-SPAN_SIZE_MHZ = 50           #Initialize settings
-START_SCAN_MHZ = 5800
-STOP_SCAN_MHZ = 5850
+SPAN_SIZE_MHZ = 20           #Initialize settings
+START_SCAN_MHZ = 2990
+STOP_SCAN_MHZ = 3010
+FFT_Points = 512   # FFT points. Must be multiple of 2.
+LNA_25dB = RFE_Common.eInputStage.LNA_25dB
 
 #---------------------------------------------------------
 # Main processing loop
@@ -145,35 +142,68 @@ try:
             #STOP_SCAN_MHZ = START_SCAN_MHZ + 200
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
 
+            objRFE.SendCommand("C+\x00")    # Normal mode
+            #objRFE.SendCommand("C+\x10")    # Average mode
+            time.sleep(3)
+            objRFE.SendCommand("Cp2")       # DSP: fast
+            time.sleep(3)
+            objRFE.SendCommand("Cj" + chr(int((FFT_Points & 0xFF00) >> 8)) + chr(int(FFT_Points & 0xFF)))
+            time.sleep(3)
+            objRFE.SendCommand("a" + str(LNA_25dB.value))  # Enable LNA 25dB
+            time.sleep(3)
+
+
+            # Start connection with Pixhawk through Mavlink
+            ARRC_mav_connection = mavutil.mavserial('/dev/serial0', baud=115200, source_system=1, source_component=191)
+            
+            # Wait for hearbeat from Pixhawk
+            PX4_beat = ARRC_mav_connection.wait_heartbeat()
+            print("Mavlink connection: "+ str(PX4_beat))
+            print("Heartbeat system: sysID %u compID %u" % (ARRC_mav_connection.target_system, ARRC_mav_connection.target_component))
+            
+            # Send RPi heartbeat to confirm handshake
+            ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
+
+            # Wait for config message 
+            msg = ARRC_mav_connection.recv_match(type='ARRC_SENSOR_RAW', blocking=True)
+            if not msg:
+                START_SCAN_MHZ = 2990
+                STOP_SCAN_MHZ = 3010
+            elif msg.get_type() == "BAD_DATA":
+                START_SCAN_MHZ = 2990
+                STOP_SCAN_MHZ = 3010
+            else:
+                START_SCAN_MHZ = msg.dfreq - 10
+                STOP_SCAN_MHZ = msg.dfreq + 10
+
             #Control settings
             SpanSize, StartFreq, StopFreq = ControlSettings(objRFE)
             if(SpanSize and StartFreq and StopFreq):
-                nInd = 0
+                last_beat = time.time()
+                last_RAM_reset = time.time()
+                
+                #Set new configuration into device
+                objRFE.UpdateDeviceConfig(StartFreq, StopFreq)
+                objSweep=None
                 while (True): 
-                    #Set new configuration into device
-                    objRFE.UpdateDeviceConfig(StartFreq, StopFreq)
 
-                    objSweep=None
-                    #Wait for new configuration to arrive (as it will clean up old sweep data)
-                    while(True):
-                        objRFE.ProcessReceivedString(True);
-                        if (objRFE.SweepData.Count>0):
-                            objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
+                    # Clear the RAM every once in a while
+                    if(time.time() - last_RAM_reset > 10):
+                        objRFE.CleanSweepData()
+                        objRFE.ResetInternalBuffers()
+                        last_RAM_reset = time.time()
 
-                            nInd += 1
-                            #print("Freq range["+ str(nInd) + "]: " + str(StartFreq) +" - "+ str(StopFreq) + "MHz" )
-                            PrintPeak(objRFE)
-                    #     if(math.fabs(objRFE.StartFrequencyMHZ - StartFreq) <= 0.001):
-                    #             break
-  
-                    # #set new frequency range
-                    # StartFreq = StopFreq
-                    # StopFreq = StartFreq + SpanSize
-                    # if (StopFreq > STOP_SCAN_MHZ):
-                    #     StopFreq = STOP_SCAN_MHZ
+                    # Send Heartbeat to Pixhawk every second
+                    if(time.time() - last_beat > 0.95):
+                        ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
+                        last_beat = time.time()
 
-                    # if (StartFreq >= StopFreq):
-                    #     break
+                    # Read the RFExplorer and send data over Mavlink
+                    objRFE.ProcessReceivedString(True)
+                    if (objRFE.SweepData.Count>0):
+                        objSweep=objRFE.SweepData.GetData(objRFE.SweepData.Count-1)
+                        PrintPeak(objRFE)
+            
             else:
                 print("Error: settings are wrong.\nPlease, change and try again")
     else:
