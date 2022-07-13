@@ -143,7 +143,7 @@ try:
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
 
             objRFE.SendCommand("C+\x00")    # Normal mode
-            #objRFE.SendCommand("C+\x03")    # Average mode
+            #objRFE.SendCommand("C+\x10")    # Average mode
             time.sleep(3)
             objRFE.SendCommand("Cp2")       # DSP: fast
             time.sleep(3)
