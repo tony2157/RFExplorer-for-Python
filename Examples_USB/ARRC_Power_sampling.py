@@ -105,6 +105,7 @@ objRFE.AutoConfigure = False
 SPAN_SIZE_MHZ = 20           #Initialize settings
 START_SCAN_MHZ = 2990
 STOP_SCAN_MHZ = 3010
+FFT_Points = 512   # FFT points. Must be multiple of 2.
 
 #---------------------------------------------------------
 # Main processing loop
@@ -140,9 +141,15 @@ try:
             #STOP_SCAN_MHZ = START_SCAN_MHZ + 200
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
 
-            #objRFE.SendCommand("C+\x03")    # Normal mode
+            objRFE.SendCommand("C+\x00")    # Normal mode
             #objRFE.SendCommand("C+\x03")    # Average mode
+            time.sleep(1)
             objRFE.SendCommand("Cp2")       # DSP: fast
+            time.sleep(1)
+            objRFE.SendCommand("Cj" + chr(int((FFT_Points & 0xFF00) >> 8)) + chr(int(FFT_Points & 0xFF)))
+            time.sleep(1)
+            objRFE.SendCommand("a" + str(RFE_Common.eInputStage.LNA_25dB))  # Enable LNA 25dB
+            time.sleep(1)
 
 
             # Start connection with Pixhawk through Mavlink
