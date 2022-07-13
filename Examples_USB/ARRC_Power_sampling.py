@@ -107,6 +107,7 @@ START_SCAN_MHZ = 2990
 STOP_SCAN_MHZ = 3010
 FFT_Points = 512   # FFT points. Must be multiple of 2.
 LNA_25dB = RFE_Common.eInputStage.LNA_25dB
+CalcMode = 0    # 0: Normal, 2: Average
 
 #---------------------------------------------------------
 # Main processing loop
@@ -142,8 +143,7 @@ try:
             #STOP_SCAN_MHZ = START_SCAN_MHZ + 200
             #SPAN_SIZE_MHZ = 50 is the minimum span available for RF Explorer SA models
 
-            objRFE.SendCommand("C+\x00")    # Normal mode
-            #objRFE.SendCommand("C+\x10")    # Average mode
+            objRFE.SendCommand("C+" + chr(int(CalcMode & 0xFF)))    # Calculator mode
             time.sleep(3)
             objRFE.SendCommand("Cp2")       # DSP: fast
             time.sleep(3)
