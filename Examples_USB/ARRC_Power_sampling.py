@@ -106,6 +106,7 @@ SPAN_SIZE_MHZ = 20           #Initialize settings
 START_SCAN_MHZ = 2990
 STOP_SCAN_MHZ = 3010
 FFT_Points = 512   # FFT points. Must be multiple of 2.
+LNA_25dB = RFE_Common.eInputStage.LNA_25dB
 
 #---------------------------------------------------------
 # Main processing loop
@@ -148,7 +149,7 @@ try:
             time.sleep(1)
             objRFE.SendCommand("Cj" + chr(int((FFT_Points & 0xFF00) >> 8)) + chr(int(FFT_Points & 0xFF)))
             time.sleep(1)
-            objRFE.SendCommand("a" + str(RFE_Common.eInputStage.LNA_25dB))  # Enable LNA 25dB
+            objRFE.SendCommand("a" + str(LNA_25dB.value))  # Enable LNA 25dB
             time.sleep(1)
 
 
