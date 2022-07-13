@@ -144,13 +144,13 @@ try:
 
             objRFE.SendCommand("C+\x00")    # Normal mode
             #objRFE.SendCommand("C+\x03")    # Average mode
-            time.sleep(1)
+            time.sleep(3)
             objRFE.SendCommand("Cp2")       # DSP: fast
-            time.sleep(1)
+            time.sleep(3)
             objRFE.SendCommand("Cj" + chr(int((FFT_Points & 0xFF00) >> 8)) + chr(int(FFT_Points & 0xFF)))
-            time.sleep(1)
+            time.sleep(3)
             objRFE.SendCommand("a" + str(LNA_25dB.value))  # Enable LNA 25dB
-            time.sleep(1)
+            time.sleep(3)
 
 
             # Start connection with Pixhawk through Mavlink
