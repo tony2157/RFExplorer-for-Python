@@ -50,9 +50,13 @@ while (True):
     samples = sdr.rx() # receive samples off Pluto
 
     IQ_dfreq = samples[511]
+    abss = abs(IQ_dfreq)
     #print(IQ_dfreq)
 
-    pwr_dB = 20*math.log10(abs(IQ_dfreq))
+    if (abs != 0):
+        pwr_dB = 20*math.log10(abss)
+    else:
+        pwr_dB = -140
 
     print(pwr_dB)
 
