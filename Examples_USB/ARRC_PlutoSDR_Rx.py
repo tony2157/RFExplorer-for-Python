@@ -1,6 +1,5 @@
 import time
 import math
-import numpy
 import cmath
 import numpy as np
 import adi
@@ -51,16 +50,18 @@ while (True):
     samples = sdr.rx() # receive samples off Pluto
 
     IQ_dfreq = samples[511]
-    print(IQ_dfreq)
+    #print(IQ_dfreq)
 
-    pwr_dB = 10*math.log10(abs(IQ_dfreq))
+    pwr_dB = 20*math.log10(abs(IQ_dfreq))
+
+    print(pwr_dB)
 
     # Put code to save data to Pi's SD card here
 
     # Send Mavlink messege to Pixhawk
-    if(time.time() - last_msg_sent > 0.1):
+    if(time.time() - last_msg_sent > 0.05):
         # Pack ARRC's message and send it
-        ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,center_freq/1000000,pwr_dB)
+        ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,center_freq/1e6,pwr_dB)
 
     # Send Heartbeat to Pixhawk every second
     if(time.time() - last_beat > 0.95):
