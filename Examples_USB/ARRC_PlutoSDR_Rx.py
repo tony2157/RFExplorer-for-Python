@@ -38,7 +38,7 @@ center_freq = DFREQ*1e6
 num_samps = 1024 # number of samples returned per call to rx()
 
 sdr.gain_control_mode_chan0 = 'manual'
-sdr.rx_hardwaregain_chan0 = 0.0 # dB
+sdr.rx_hardwaregain_chan0 = 47.0 # dB
 sdr.rx_lo = int(center_freq)
 sdr.sample_rate = int(sample_rate)
 sdr.rx_rf_bandwidth = int(sample_rate) # filter width, just set it to the same as sample rate for now
@@ -49,14 +49,14 @@ last_beat = time.time()
 while (True):
     samples = sdr.rx() # receive samples off Pluto
 
-    IQ_dfreq = samples[511]
-    abss = abs(IQ_dfreq)
+    #IQ_dfreq = samples[511]
+    #abss = abs(IQ_dfreq)
     #print(IQ_dfreq)
 
-    if (abs != 0):
-        pwr_dB = 20*math.log10(abss)
-    else:
-        pwr_dB = -140
+    samples = samples * np.hamming(len(samples))        # apply a Hamming window
+    PSD = (np.abs(np.fft.fft(samples))/len(samples))**2
+    #pwr_dB = 10.0*np.log10(PSD[511])
+    pwr_dB = 10.0*np.log10(max(PSD))
 
     print(pwr_dB)
 
