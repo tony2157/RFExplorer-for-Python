@@ -54,19 +54,13 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
     samples = sdr.rx()  # receive samples off Pluto
     N = len(samples)    # The center freq is at N/2-1
 
-    avg_pwr = np.mean(np.abs(samples)**2)
-    avg_pwr_2 = np.var(samples) # (signal should have roughly zero mean)
-    print(avg_pwr)
-    print(avg_pwr_2)
-
     #IQ_dfreq = samples[511]
     #abss = abs(IQ_dfreq)
     #print(IQ_dfreq)
 
     samples = samples * np.hamming(N)           # apply a Hamming window
     PSD = (np.abs(np.fft.fft(samples))/N)**2
-    #pwr_dB = 10.0*np.log10(PSD[511])
-    pwr_dB = 10.0*np.log10(max(PSD))     # Narrow range where to search for peak power
+    pwr_dB = 10.0*np.log10(max(PSD))     # Search for peak power
 
     print(pwr_dB)
 
