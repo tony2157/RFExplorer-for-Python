@@ -69,14 +69,16 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
     samples = samples * np.hamming(N)           # apply a Hamming window
     PSD = (np.abs(np.fft.fft(samples))/N)**2
     peak_pwr = max(PSD)
-    ndx_peak = PSD.index(peak_pwr)
 
     ndx_peak = 0
     for i in range(1,len(PSD)):
         if PSD[i] > max:
             ndx_peak = i
 
-    if(ndx_peak >= min(last_ndx_peak+41,len(samples)-1) or ndx_peak <= max(last_ndx_peak-41,0)):
+    a = int(min(last_ndx_peak+41,len(samples)-1))
+    b = int(max(last_ndx_peak-41,0))
+
+    if(ndx_peak >= a or ndx_peak <= b):
         last_ndx_peak = ndx_peak
         validate_time = time.time()
         if(time.time() - lock_time > 10):
