@@ -68,11 +68,11 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
 
     samples = samples * np.hamming(N)           # apply a Hamming window
     PSD = (np.abs(np.fft.fft(samples))/N)**2
-    peak_pwr = max(PSD)
 
     ndx_peak = 0
     for i in range(1,len(PSD)):
-        if PSD[i] > max:
+        if PSD[i] > peak_pwr:
+            peak_pwr = PSD[i]
             ndx_peak = i
 
     a = int(min(last_ndx_peak+41,len(samples)-1))
@@ -85,7 +85,7 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
             freq_lock = False
             peak_pwr = max(PSD)
         else:
-            peak_pwr = max(PSD[max(ndx_lock-41,0):min(ndx_lock+41,len(samples)-1)])
+            peak_pwr = max(PSD[int(max(ndx_lock-41,0)):int(min(ndx_lock+41,len(samples)-1))])
     else:
         last_ndx_peak = ndx_peak
         lock_time = time.time()
@@ -93,7 +93,7 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
             ndx_lock = ndx_peak
             freq_lock = True
         if(freq_lock == True):
-            peak_pwr = max(PSD[max(ndx_lock-41,0):min(ndx_lock+41,len(samples)-1)])
+            peak_pwr = max(PSD[int(max(ndx_lock-41,0)):int(min(ndx_lock+41,len(samples)-1))])
 
     pwr_dB = 10.0*np.log10(peak_pwr) - 77     # Search for peak power
 
