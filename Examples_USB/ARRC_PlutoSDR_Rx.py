@@ -1,6 +1,7 @@
 import time
 import math
 import cmath
+from tokenize import PseudoToken
 import numpy as np
 import adi
 from pymavlink import mavutil
@@ -70,6 +71,11 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
     peak_pwr = max(PSD)
     ndx_peak = PSD.index(peak_pwr)
 
+    ndx_peak = 0
+    for i in range(1,len(PSD)):
+        if PSD[i] > max:
+            ndx_peak = i
+
     if(ndx_peak >= min(last_ndx_peak+41,len(samples)-1) or ndx_peak <= max(last_ndx_peak-41,0)):
         last_ndx_peak = ndx_peak
         validate_time = time.time()
@@ -77,7 +83,7 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
             freq_lock = False
             peak_pwr = max(PSD)
         else:
-            peak_pwr = max(PSD[ndx_lock-41:ndx_lock+41])
+            peak_pwr = max(PSD[max(ndx_lock-41,0):min(ndx_lock+41,len(samples)-1)])
     else:
         last_ndx_peak = ndx_peak
         lock_time = time.time()
@@ -85,7 +91,7 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
             ndx_lock = ndx_peak
             freq_lock = True
         if(freq_lock == True):
-            peak_pwr = max(PSD[ndx_lock-41:ndx_lock+41])
+            peak_pwr = max(PSD[max(ndx_lock-41,0):min(ndx_lock+41,len(samples)-1)])
 
     pwr_dB = 10.0*np.log10(peak_pwr) - 77     # Search for peak power
 
