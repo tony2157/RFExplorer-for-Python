@@ -49,10 +49,10 @@ sdr.rx_buffer_size = num_samps
 
 last_msg_sent = time.time()
 last_beat = time.time()
-last_loop = time.time()
-while (True):
+#last_loop = time.time()
+while (True):   # This loop runs with a sampling period of 0.003sec ish
     samples = sdr.rx()  # receive samples off Pluto
-    N = len(samples)    # The center freq is at N-1
+    N = len(samples)    # The center freq is at N/2-1
 
     #IQ_dfreq = samples[511]
     #abss = abs(IQ_dfreq)
@@ -61,7 +61,7 @@ while (True):
     samples = samples * np.hamming(N)           # apply a Hamming window
     PSD = (np.abs(np.fft.fft(samples))/N)**2
     #pwr_dB = 10.0*np.log10(PSD[511])
-    pwr_dB = 10.0*np.log10(max(PSD[N-2:N]))     # Narrow range where to search for peak power
+    pwr_dB = 10.0*np.log10(max(PSD[int(N/2)-2:int(N/2)]))     # Narrow range where to search for peak power
 
     print(pwr_dB)
 
@@ -78,5 +78,5 @@ while (True):
         ARRC_mav_connection.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_ONBOARD_CONTROLLER, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
         last_beat = time.time()
 
-    print(time.time() - last_loop)
-    last_loop = time.time()
+    #print(time.time() - last_loop)
+    #last_loop = time.time()
