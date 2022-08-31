@@ -9,7 +9,7 @@ from pymavlink import mavutil
 
 time.sleep(10)
 
-sdr = adi.Pluto('ip:192.168.2.1')
+sdr = adi.Pluto('ip:192.168.2.4')
 
 time.sleep(5)
 
@@ -44,7 +44,7 @@ sdr.gain_control_mode_chan0 = 'manual'
 sdr.rx_hardwaregain_chan0 = 47.0 # dB
 sdr.rx_lo = int(center_freq)
 sdr.sample_rate = int(sample_rate)
-sdr.rx_rf_bandwidth = int(sample_rate) # filter width, just set it to the same as sample rate for now
+sdr.rx_rf_bandwidth = int(sample_rate/10) # filter width
 sdr.rx_buffer_size = num_samps
 
 last_msg_sent = time.time()
@@ -62,12 +62,12 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
     PSD = (np.abs(np.fft.fft(samples))/N)**2
     pwr_dB = 10.0*np.log10(max(PSD))     # Search for peak power
 
-    print(pwr_dB)
+    #print(pwr_dB)  # Enable this for debugging
 
-    # Put code to save data to Pi's SD card here
+    # Put code to save data to Pi's SD card here (include IQ values)
 
     # Send Mavlink messege to Pixhawk
-    if(time.time() - last_msg_sent > 0.05):
+    if(time.time() - last_msg_sent > 0.02):
         # Pack ARRC's message and send it
         ARRC_mav_connection.mav.arrc_sensor_raw_send(10,0,center_freq/1e6,pwr_dB)
         last_msg_sent = time.time()
