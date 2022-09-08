@@ -45,18 +45,8 @@ sdr.gain_control_mode_chan0 = 'manual'
 sdr.rx_hardwaregain_chan0 = 47.0 # dB
 sdr.rx_lo = int(center_freq)
 sdr.sample_rate = int(sample_rate)
-sdr.rx_rf_bandwidth = int(sample_rate/10) # filter width
+sdr.rx_rf_bandwidth = int(sample_rate/5) # filter width
 sdr.rx_buffer_size = num_samps
-
-# Initialize global parameters
-#last_loop = time.time()
-last_msg_sent = time.time()
-last_beat = time.time()
-last_ndx_peak = num_samps/2
-ndx_lock = num_samps/2
-validate_time = time.time()
-lock_time = time.time()
-freq_lock = False
 
 while (True):   # This loop runs with a sampling period of 0.003sec ish
     samples = sdr.rx()  # receive samples off Pluto
@@ -66,36 +56,12 @@ while (True):   # This loop runs with a sampling period of 0.003sec ish
     #abss = abs(IQ_dfreq)
     #print(IQ_dfreq)
 
-    samples = samples * np.hamming(N)           # apply a Hamming window
+    #samples = samples * np.hamming(N)           # apply a Hamming window
     PSD = (np.abs(np.fft.fft(samples))/N)**2
 
-    ndx_peak = 0
-    for i in range(1,len(PSD)):
-        if PSD[i] > peak_pwr:
-            peak_pwr = PSD[i]
-            ndx_peak = i
+    peak_pwr = max(PSD)
 
-    a = int(min(last_ndx_peak+41,len(samples)-1))
-    b = int(max(last_ndx_peak-41,0))
-
-    if(ndx_peak >= a or ndx_peak <= b):
-        last_ndx_peak = ndx_peak
-        validate_time = time.time()
-        if(time.time() - lock_time > 10):
-            freq_lock = False
-            peak_pwr = max(PSD)
-        else:
-            peak_pwr = max(PSD[int(max(ndx_lock-41,0)):int(min(ndx_lock+41,len(samples)-1))])
-    else:
-        last_ndx_peak = ndx_peak
-        lock_time = time.time()
-        if(time.time() - validate_time > 5):
-            ndx_lock = ndx_peak
-            freq_lock = True
-        if(freq_lock == True):
-            peak_pwr = max(PSD[int(max(ndx_lock-41,0)):int(min(ndx_lock+41,len(samples)-1))])
-
-    pwr_dB = 10.0*np.log10(peak_pwr) - 77     # Search for peak power
+    pwr_dB = 10.0*np.log10(peak_pwr) - 64     # Search for peak power
 
     #print(pwr_dB)  # Enable this for debugging
 
